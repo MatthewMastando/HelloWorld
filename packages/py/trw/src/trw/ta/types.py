@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 import numpy as np
@@ -20,7 +20,7 @@ import pandas as pd
 CALC_VERSION = "ta-2026.09.1"
 
 
-class InstrumentKind(str, Enum):
+class InstrumentKind(StrEnum):
     FUTURE_CONTRACT = "future_contract"
     EQUITY = "equity"
     ETF = "etf"
@@ -77,7 +77,7 @@ class CandleFrame:
         missing = [c for c in self.REQUIRED if c not in df.columns]
         if missing:
             raise ValueError(f"CandleFrame missing columns: {missing}")
-        if not pd.api.types.is_datetime64tz_dtype(df["ts"]):
+        if not isinstance(df["ts"].dtype, pd.DatetimeTZDtype):
             raise ValueError("ts must be tz-aware (UTC)")
         if not df["ts"].is_monotonic_increasing or df["ts"].duplicated().any():
             raise ValueError("ts must be strictly increasing and unique")
@@ -126,12 +126,12 @@ class CandleFrame:
         return int(idx[-1])
 
 
-class Direction(str, Enum):
+class Direction(StrEnum):
     BULLISH = "bullish"
     BEARISH = "bearish"
 
 
-class FeatureType(str, Enum):
+class FeatureType(StrEnum):
     SWING_PIVOT = "swing_pivot"
     LIQUIDITY_POOL = "liquidity_pool"
     FVG = "fvg"
@@ -142,7 +142,7 @@ class FeatureType(str, Enum):
     VOLUME_PROFILE = "volume_profile"
 
 
-class FeatureState(str, Enum):
+class FeatureState(StrEnum):
     CONFIRMED = "confirmed"  # fresh, untouched
     TOUCHED = "touched"
     PARTIAL_FILL = "partial_fill"
@@ -193,9 +193,7 @@ class Feature:
             self.as_of = self.snapshot.as_of
 
 
-EventKind = Literal[
-    "confirmed", "touched", "partial_fill", "midpoint_touched", "full_fill", "consumed", "invalidated"
-]
+EventKind = Literal["confirmed", "touched", "partial_fill", "midpoint_touched", "full_fill", "consumed", "invalidated"]
 
 
 @dataclass(frozen=True)

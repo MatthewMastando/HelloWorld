@@ -8,7 +8,6 @@ from decimal import Decimal
 import numpy as np
 import pandas as pd
 import pytest
-
 from trw.ta.primitives import (
     atr_wilder,
     displacement_mask,
@@ -146,7 +145,6 @@ def test_atr_wilder_seed_and_smoothing() -> None:
 
 def test_atr_wilder_hand_calculated_with_gap() -> None:
     # 16 bars; bar i has range 1.0 except bar 15 gaps up: prev close 100, high 105, low 104 -> TR = 5
-    n = 16
     close = [100.0] * 15 + [104.5]
     high = [100.5] * 15 + [105.0]
     low = [99.5] * 15 + [104.0]

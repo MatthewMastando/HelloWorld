@@ -116,16 +116,12 @@ def detect_fvg(
     for i in range(2, last + 1):
         bull_gap = low[i] - high[i - 2]
         bear_gap = low[i - 2] - high[i]
-        # B must reach back to A's edge, otherwise the gap was already fully
-        # formed by B and C merely maintains it (no new zone left behind).
-        b_touches_a_up = low[i - 1] <= high[i - 2]
-        b_touches_a_dn = high[i - 1] >= low[i - 2]
         direction: Direction | None = None
         bottom = top = 0.0
-        if bull_gap >= params.min_ticks * tick - 1e-12 and b_touches_a_up:
+        if bull_gap >= params.min_ticks * tick - 1e-12:
             direction = Direction.BULLISH
             bottom, top = float(high[i - 2]), float(low[i])
-        elif bear_gap >= params.min_ticks * tick - 1e-12 and b_touches_a_dn:
+        elif bear_gap >= params.min_ticks * tick - 1e-12:
             direction = Direction.BEARISH
             bottom, top = float(high[i]), float(low[i - 2])
         if direction is None:

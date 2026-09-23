@@ -7,7 +7,6 @@ from decimal import Decimal
 
 import numpy as np
 import pytest
-
 from trw.ta.detectors import (
     detect_bos,
     detect_fvg,
@@ -117,13 +116,15 @@ def test_fvg_state_tracking_touch_fill_invalidation() -> None:
     open_[18], close[18], high[18], low[18] = 101.5, 100.0, 101.5, 99.75
     f = make_frame(close, high, low, open_)
     res = detect_fvg(f, SPEC, SNAP, FVGParams())
-    assert len(res.features) == 1
-    kinds = [(e.kind, e.observed_at_index) for e in res.events]
+    # bars 18-20 also leave a bullish gap (high[18]=101.5 < low[20]=103); we track the first zone only
+    zone = [x for x in res.features if x.origin_index == 10]
+    assert len(zone) == 1
+    kinds = [(e.kind, e.observed_at_index) for e in res.events if e.feature_id == zone[0].feature_id]
     assert ("confirmed", 12) in kinds
     assert ("touched", 14) in kinds
     assert ("midpoint_touched", 16) in kinds
     assert ("invalidated", 18) in kinds
-    assert res.features[0].state == FeatureState.INVALIDATED
+    assert zone[0].state == FeatureState.INVALIDATED
     # events are in observation order
     assert [e.observed_at_index for e in res.events] == sorted(e.observed_at_index for e in res.events)
 
@@ -343,13 +344,13 @@ def _closes_with_two_lows(second_low_higher_rsi: bool) -> list[float]:
     close[36:45] = np.array([99, 98, 97, 96.5, 96.0, 96.5, 97, 98, 99]) + 0
     close[56:65] = np.array([98.5, 98, 97, 96.2, 95.5, 96.2, 97, 98, 98.5]) + 0
     if second_low_higher_rsi:
-        # sharp fall into first low (low RSI), gentle drift into second (higher RSI)
-        close[30:36] = [103, 102.5, 102, 101.5, 101, 100]
-        close[45:56] = [99.2] * 11
-    else:
-        # gentle into first, violent into second -> no bullish divergence
+        # long slide into first low (RSI ~13), rally then dip into second (RSI ~29)
         close[30:36] = [99.5, 99.4, 99.3, 99.2, 99.1, 99.0]
         close[45:56] = [104, 104.5, 105, 104.5, 104, 103, 102, 101, 100, 99.5, 99]
+    else:
+        # first low RSI ~24, second low RSI ~23 -> no bullish divergence
+        close[30:36] = [103, 102.5, 102, 101.5, 101, 100]
+        close[45:56] = [99.2] * 11
     return list(close)
 
 

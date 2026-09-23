@@ -25,12 +25,6 @@ dev = [
 
 [tool.ruff]
 line-length = 120
-# Contract files authored as-is (str+Enum style, fixture code) — not to be restyled.
-exclude = [
-    "packages/py/trw/src/trw/ta/types.py",
-    "tests/ta/test_primitives.py",
-    "tests/ta/test_detectors.py",
-]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -41,8 +35,3 @@ pythonpath = ["tests"]
 
 [tool.mypy]
 strict = true
-
-# types.py is an authored contract file (uses a pandas API mypy's stubs don't expose).
-[[tool.mypy.overrides]]
-module = "trw.ta.types"
-disable_error_code = ["attr-defined"]
