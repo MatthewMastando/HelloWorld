@@ -1,0 +1,48 @@
+[project]
+name = "helloworld-workspace"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["trw"]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/py/trw"]
+
+[tool.uv.sources]
+trw = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pandas-stubs",
+    "hypothesis",
+    "pip-licenses",
+]
+
+[tool.ruff]
+line-length = 120
+# Contract files authored as-is (str+Enum style, fixture code) — not to be restyled.
+exclude = [
+    "packages/py/trw/src/trw/ta/types.py",
+    "tests/ta/test_primitives.py",
+    "tests/ta/test_detectors.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+
+[tool.mypy]
+strict = true
+
+# types.py is an authored contract file (uses a pandas API mypy's stubs don't expose).
+[[tool.mypy.overrides]]
+module = "trw.ta.types"
+disable_error_code = ["attr-defined"]
